@@ -141,8 +141,15 @@ Phases should be **vertical slices** when possible (one feature end-to-end), 3-6
 ```markdown
 # Checkpoint log
 
-(appended by hooks; trimmed to last 30 entries)
+(appended by hooks; one line per event; trimmed to last 15 entries)
 ```
+
+Entries are written by `hooks/psd-checkpoint.sh` as a single line each:
+`## <timestamp>  <event>:<tool>  <clean|dirty:N>`. Consecutive same-event runs
+collapse into a `ts1..ts2` range, so an Edit×8 burst is one entry, not eight.
+Consumers (psd-resumer, psd-debugger) should `tail -10 .planning/CHECKPOINT.md`
+via Bash rather than `Read` the whole file — the format is line-oriented and
+the agent only ever needs the most recent ~5 entries.
 
 ## Cross-AI handoff files (project root, NOT under `.planning/`)
 

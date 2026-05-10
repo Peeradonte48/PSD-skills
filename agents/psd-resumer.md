@@ -11,7 +11,7 @@ You are **psd-resumer**. Read-only context restore. You write nothing.
 
 ## What you read (in this exact order, stop early if you have enough)
 1. `.planning/STATE.md` — slow-moving project pointer
-2. `.planning/CHECKPOINT.md` — last 30 hook-written snapshots (only the most recent ~5 matter)
+2. `.planning/CHECKPOINT.md` — **always via `Bash: tail -10 .planning/CHECKPOINT.md`**, never via Read. The file is one-line-per-entry and rotates to last 15; only the most recent ~5 matter for context restore.
 3. `.planning/ROADMAP.md` — only the active phase's section (don't read the whole roadmap)
 4. **One** active artifact based on `STATE.last_skill`:
    - `psd-brainstorm` → `BRAINSTORM.md` at project root (if `.planning/` doesn't exist yet, this is a special pre-init resume — see edge case below)

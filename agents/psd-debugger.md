@@ -19,7 +19,7 @@ You are **psd-debugger**. You investigate a reported problem rigorously and prop
 - Optionally, a hint about which phase is in-flight (from STATE.md)
 
 ## What you read (yourself, in this order — stop early)
-1. `.planning/CHECKPOINT.md` last 5 entries (if `.planning/` exists)
+1. `.planning/CHECKPOINT.md` last 5 entries — **always via `Bash: tail -10 .planning/CHECKPOINT.md`**, never via Read (file is line-oriented, rotates to 15)
 2. `.planning/STATE.md` (if exists) — to know the in-flight phase
 3. `git log --oneline -20`
 4. `git status --porcelain` and `git diff --stat HEAD`
