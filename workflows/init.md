@@ -7,13 +7,18 @@ Bootstrap a new project's `.planning/` directory.
 2. If CWD is not a git repo → ask user (via AskUserQuestion) whether to `git init` first. If they decline, abort.
 3. If `BRAINSTORM.md` exists at project root → **pre-fill** inputs from it (see "Brainstorm hand-off" below). Otherwise gather inputs interactively.
 
-## Inputs to gather (one AskUserQuestion call, multi-question)
-If BRAINSTORM.md is present, pre-fill these fields from its "Distilled" / "Top requirements" / "Out of scope" / "Hard constraints" sections and ask the user to confirm or edit. If absent, gather fresh:
+## Fields gathered (the agent runs the dialogue, not the orchestrator)
+
+The `initializer` agent runs an adaptive Socratic Q&A and gathers these fields. If BRAINSTORM.md is present, pre-fill from its "Distilled" / "Top requirements" / "Out of scope" / "Hard constraints" sections and only confirm-or-edit; otherwise probe fresh.
 
 - **Project name** — short identifier
 - **Problem statement** — 1-3 sentences: what is being built and for whom
 - **Top 3 requirements** — must-have capabilities for v1
 - **Out of scope** — what v1 explicitly does *not* include
+- **App type / persistence / auth** — only when needed to pick a stack (see Stack selection below)
+- **Hard constraints** — deadline, must-use stack, services to integrate with — often empty
+
+See "Clarification protocol" below for the dialogue rules (budget, clarification mode, "I don't know" handler, mid-flow reflect, "Keep going?" extension). The orchestrator never gathers these itself — it only gates and dispatches.
 
 ## Stack selection (binding step — happens before writing any file)
 
@@ -48,28 +53,84 @@ The defaults bias toward Vercel-ecosystem because they minimize ops setup for no
 ### Output
 The chosen stack goes into `.planning/PROJECT.md` under a `## Stack` section (template below). The planner reads this and uses the chosen tools, conventions, and idioms. The roadmap should be written **with the stack in mind** — e.g., for a Next.js project, Phase 1 is typically "scaffold app + happy-path route + deploy preview."
 
+## Clarification protocol (binding)
+
+The `initializer` agent runs the dialogue with the user. These rules mirror the brainstormer/discusser pattern so a fuzzy user gets the same Socratic feel everywhere in the suite.
+
+### Adaptive Q&A budget
+- **Default budget: 7 questions.** Target only fields that aren't already pre-filled by BRAINSTORM.md or detected codebase.
+- Group multi-part questions into one `AskUserQuestion` call where supported.
+- Each question: 2-4 options + free-form "Other".
+- Don't waste questions on signals you already have — e.g., a detected `package.json` answers App Type; a BRAINSTORM.md "Hard constraints" line answers stack pre-emptively.
+
+### Clarification mode (when "Other" is a question, not an answer)
+If the user's "Other" text is a clarification request — detect via `?`, "what does", "what's the difference", "what do you mean", "explain", "I don't understand", "I'm not sure what", "huh", "give me an example" — the agent's NEXT response is to:
+1. Explain the question / options in 1-3 plain-English sentences (no jargon).
+2. Give a concrete example: "If you picked A, v1 would have X. If you picked B, Y."
+3. Re-ask the SAME question, refining option wording if a missing case was revealed.
+
+Clarifications do **NOT** count against the budget. Cap at 3 clarifications per underlying question — after 3, the agent picks the safest default with a one-line rationale and continues.
+
+### "I don't know" handler
+When a user answer is "I don't know" or vague:
+1. Propose 2-3 reasonable defaults with one-line tradeoffs (derived from BRAINSTORM.md context, detected codebase, prior answers).
+2. Re-ask with those as options + "Still not sure".
+3. If "Still not sure" again, pick the safest default (most reversible) and tell the user: "I'll go with X for v1; we can revisit in `/psd:discuss` before planning."
+4. Record both the IDK and the default applied (with reason) in PROJECT.md's "## Defaults applied" section.
+
+This counts as **1 question** against the budget, not 2. Cap at 3 IDK rounds per underlying question.
+
+### Mid-flow reflect (binding when shallow)
+Trigger when EITHER: BRAINSTORM.md is absent AND the user's first answers are short (< ~20 words combined) OR an "I don't know" handler has already fired.
+
+After 3-4 questions, the agent pauses Q&A and writes a one-paragraph reflective summary:
+
+> "Here's what I think you want: a **{app type}** for **{persona / first user}**, where the core thing is **{smallest useful v1}**, deliberately not including **{out of scope}**. Recommended stack: **{stack}**. Did I get it right?"
+
+`AskUserQuestion`: "Yes, that's right" / "Mostly, with tweaks" / "No, restart". Costs 1 question against the budget.
+
+### "Keep going?" gate (mandatory after question 7)
+After Q7 — even if the agent already has enough — issue one final `AskUserQuestion`:
+
+```
+Header: "Keep going?"
+Question: "I have enough to set up the project, but want to dig deeper first?"
+Options:
+  • "Set it up now"
+  • "Yes — 3 more questions"
+  • "Yes — 5 more questions"
+```
+
+The gate itself does NOT count against the budget. Hard cap at **12 questions total**. After Q12, force-confirm-and-write regardless of clarity.
+
+### Q&A log destination
+After files are written, the agent appends two sections to `.planning/PROJECT.md`:
+- `## Init Q&A log` — verbatim Q&A, with clarifications as nested entries.
+- `## Defaults applied` — every IDK → chosen default with reason. Omit the heading if no defaults were applied.
+
+The planner reads these for traceability without re-asking.
+
 ## Subagent dispatch
-Spawn `initializer` with **only paths and the gathered answers**, not file content. Brief format:
+Spawn `initializer` with **only the cwd** (and `revision_feedback` when looping). The agent reads BRAINSTORM.md itself and runs the dialogue. Brief format:
 
 ```
 You are initializer. Bootstrap a project's .planning/ directory.
 
 Inputs:
-- name: <name>
-- problem: <statement>
-- requirements: <list>
-- out_of_scope: <list>
 - cwd: <pwd>
+- revision_feedback: <string, only present in revision mode>
 
-Read @$HOME/.claude/workflows/init.md for the full spec.
+Read @$HOME/.claude/workflows/init.md for the full spec, including the Clarification protocol you must follow.
 
 Tasks:
-1. Write .planning/PROJECT.md (vision, problem, requirements, out-of-scope)
-2. Write .planning/ROADMAP.md (3-6 phases, each with Goal + Success Criteria)
-3. Write .planning/STATE.md (milestone v1, active phase: 1, no decisions yet)
-4. Write .planning/CHECKPOINT.md (header only)
+1. Run the adaptive Q&A (3-7 questions, opt-in extension to 12), with clarification, IDK defaults, and mid-flow reflect per the protocol.
+2. Write .planning/PROJECT.md (vision, problem, requirements, out-of-scope, Stack, Init Q&A log, Defaults applied if any)
+3. Write .planning/ROADMAP.md (3-6 phases, each with Goal + Success Criteria)
+4. Write .planning/STATE.md (milestone v1, active phase: 1, no decisions yet)
+5. Write .planning/CHECKPOINT.md (header only)
+6. Write the 4 cross-AI handoff files at project root (AGENTS.md, CLAUDE.md, .github/pull_request_template.md, .gitattributes).
 
-Report back in <=200 words: phase count, phase 1 goal, anything ambiguous.
+Report back in <=200 words: phase count, phase 1 goal, Q&A count, defaults applied count, anything ambiguous.
 ```
 
 ## Artifact templates
@@ -278,11 +339,12 @@ The previewer is read-only; the initializer is the one that re-writes ROADMAP.md
 
 ## Post-conditions
 - `.planning/` exists with 4 files above
+- `PROJECT.md` contains an `## Init Q&A log` section with verbatim Q&A entries (and a `## Defaults applied` section if any IDK rounds fired)
 - Project root has `AGENTS.md` (with sentinel markers + initial Current state block), `CLAUDE.md` stub, `.github/pull_request_template.md`, and `.gitattributes` containing `AGENTS.md merge=union`
-- If BRAINSTORM.md was present: it's been merged into PROJECT.md and removed from project root
+- If BRAINSTORM.md was present: it's been merged into PROJECT.md (after the Q&A log) and removed from project root
 - `STATE.md` shows active_phase=1, last_skill=init
 - The user has been shown a plain-English preview of the roadmap and either approved it or explicitly aborted (no silent completion)
-- Main context only sees the subagent's ≤200-word summary (preview narrative is shown to the user but not retained in main context)
+- Main context only sees the subagent's ≤200-word summary (Q&A and preview narrative are shown to the user but not retained in main context)
 
 ## Failure modes
 - If subagent fails to write any file, report which one and stop. Do not retry blindly.

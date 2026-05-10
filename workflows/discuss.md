@@ -90,6 +90,61 @@ When the user selects "Other" on any AskUserQuestion and their typed text is a *
 
 This is mostly seen by the user in the conversation; CONTEXT.md preserves the trace.
 
+## "I don't know" handler (binding)
+
+When a user answer is "I don't know" or vague, the agent does NOT log a blank — it applies a default.
+
+1. Propose 2-3 reasonable defaults with one-line tradeoffs, derived from PROJECT.md Stack, similar phases in ROADMAP.md, and prior answers in this discussion.
+2. Re-ask via AskUserQuestion with those as options + "Still not sure".
+3. If "Still not sure" again, **pick the safest default** (most reversible, smallest blast radius) and tell the user: "I'll go with X for v1; we can revisit in `/psd:plan` if it doesn't fit."
+4. Record both the user's "I don't know" AND the default applied (with reason) in CONTEXT.md's Q&A log AND in a new `## Defaults applied` section.
+
+This counts as **1 question** against the budget, not 2. Cap at 3 IDK rounds per underlying question — same shape as clarification mode.
+
+## Mid-flow reflect (binding when shallow)
+
+The reflect step catches misunderstandings before CONTEXT.md is written, while questions are cheap.
+
+### Trigger conditions (any one fires the reflect)
+- Phase {N}'s goal in ROADMAP.md is itself shallow — < ~15 words of success criteria, or a one-liner with no "such that..." clause
+- An "I don't know" handler has already fired in this discussion
+- The user has answered "Other" with vague text earlier (e.g., "depends", "not sure", "whatever")
+
+### How the agent reflects
+After the 3rd or 4th question, the agent pauses Q&A and writes a one-paragraph reflective summary:
+
+> "Here's the picture I have: in this phase we're **{phase recap}**, the key decisions so far are **{1-2 decisions}**, with **{hard constraints}** as must-honor, deliberately punting **{punted edges}**. Did I get it right?"
+
+Then `AskUserQuestion`:
+- **Yes, that's right** → fill ≤2 remaining gaps, move on
+- **Mostly, with tweaks** → ask "What should change?" with likely tweaks as options + Other; apply tweaks
+- **No, restart this phase's discussion** → reset what was misunderstood and try again. Total questions still capped at 7 default / 12 hard.
+
+The reflect step costs **1 question** against the budget.
+
+## Pre-write confirmation (mandatory)
+
+Before the agent writes CONTEXT.md, it shows the user a structured preview of what's about to be captured:
+
+```
+I'm about to write CONTEXT.md with:
+- Decisions: <count> (e.g., <topic>, <topic>)
+- Hard constraints: <count>
+- Edge cases handled: <count>; punted: <count>
+- Spec contracts: <"AI-SPEC.md" | "UI-SPEC.md" | "both" | "none">
+- Open questions for planner: <count>
+- Defaults applied: <count, or "none">
+```
+
+Then `AskUserQuestion`:
+- **Looks right — write it** → proceed to write
+- **Add one more thing** → counts as 1 extra question (within remaining budget); ask the follow-up, then re-show this preview
+- **Wrong — let me clarify** → ask the user (free-form Other) which decision is wrong; correct it, then re-show this preview
+
+The pre-write gate itself does NOT count against the question budget — it's a write-gate, like the "Keep going?" prompt. Cap at 3 "Wrong" rounds before force-writing with whatever is current.
+
+This catches the "I forgot to ask about X" failure mode that's invisible inside Q&A but obvious when you see the captured state laid out.
+
 ## Common dimensions to probe (when unclear)
 - **Scope edges** — what's IN this phase but borderline? what's deliberately punted?
 - **Dependencies** — does this depend on a prior phase, an external service, a file we haven't read?
@@ -257,6 +312,11 @@ WCAG <AA | A>: keyboard-navigable, focus-visible, sufficient contrast, alt text 
 ## Hard rules
 - Never write source code or plan files
 - Never run `/psd:plan` yourself — only suggest it
-- Never exceed 7 questions
+- Never exceed **12 questions total** (7 default + opt-in extension up to 5 more)
+- The "Keep going?" gate after Q7 is **mandatory**, not optional
+- The reflect step is **not optional** when triggered (shallow phase goal, prior IDK fire, or vague Other answer)
+- The pre-write confirmation is **mandatory** — never write CONTEXT.md without it
+- Never record "unknown" without applying a default — always offer 2-3 options first; log both the IDK and the default
+- Clarifications do NOT count against the budget; cap at 3 per underlying Q
 - Never fabricate decisions; record what the user actually said
 - Q&A log entries must be verbatim

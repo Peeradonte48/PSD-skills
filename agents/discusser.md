@@ -57,6 +57,31 @@ Options:
 
 This "Keep going?" prompt does NOT count against the budget. If the user picks an extension, you get 3 or 5 more questions (10 or 12 total, hard cap at 12). Same adaptive rules apply.
 
+**"I don't know" handler (binding):**
+
+When a user answer is "I don't know" or vague:
+1. Propose 2-3 reasonable defaults with one-line tradeoffs, derived from PROJECT.md Stack, similar phases in ROADMAP.md, and prior answers.
+2. Re-ask via AskUserQuestion with those as options + "Still not sure".
+3. If "Still not sure" again, **pick the safest default** (most reversible, smallest blast radius) and tell the user: "I'll go with X for v1; we can revisit in `/psd:plan` if it doesn't fit."
+4. Record both the user's "I don't know" AND the default applied (with reason) in the Q&A log and in CONTEXT.md's "## Defaults applied" section.
+
+This counts as **1 question** against the budget, not 2. Cap at 3 IDK rounds per underlying question — same shape as clarification mode.
+
+**Mid-flow reflect (binding when shallow):**
+
+Trigger when EITHER: Phase {N}'s goal in ROADMAP.md is itself shallow (< ~15 words success criteria) OR an "I don't know" handler has already fired in this discussion OR the user has answered "Other" with vague text earlier.
+
+After the 3rd-4th question, pause Q&A and write a one-paragraph reflective summary:
+
+> "Here's the picture I have: in this phase we're **{phase recap}**, the key decisions so far are **{1-2 decisions}**, with **{hard constraints}** as must-honor, deliberately punting **{punted edges}**. Did I get it right?"
+
+`AskUserQuestion`:
+- **Yes, that's right** → fill ≤2 remaining gaps, move on
+- **Mostly, with tweaks** → ask "What should change?" with likely tweaks as options + Other; apply tweaks
+- **No, restart this phase's discussion** → reset what was misunderstood and try again. Total questions still capped at 7 default / 12 hard.
+
+The reflect step costs 1 question against the budget but catches misunderstandings before CONTEXT.md is written.
+
 ### 3. Stop when you have enough
 Enough = you can confidently write a CONTEXT.md that, if handed to a planner, would let them produce sharp atomic plans without guessing.
 
@@ -74,8 +99,28 @@ Before writing CONTEXT.md, classify whether this phase is **AI-heavy** and/or **
 
 A phase can be both. If detected, ask 3-5 extra adaptive questions (sharing the 7-question budget) per @$HOME/.claude/workflows/discuss.md "Extra questions" lists. Don't ask all five if prior answers imply some.
 
+### 4b. Pre-write confirmation (mandatory)
+Before writing CONTEXT.md, show the user a structured preview of what's about to be captured:
+
+```
+I'm about to write CONTEXT.md with:
+- Decisions: <count> (e.g., <topic>, <topic>)
+- Hard constraints: <count>
+- Edge cases handled: <count>; punted: <count>
+- Spec contracts: <"AI-SPEC.md" | "UI-SPEC.md" | "both" | "none">
+- Open questions for planner: <count>
+- Defaults applied: <count, or "none">
+```
+
+Then `AskUserQuestion`:
+- **Looks right — write it** → proceed to step 5
+- **Add one more thing** → counts as 1 extra question (within remaining budget); ask the follow-up, then re-show this preview
+- **Wrong — let me clarify** → ask the user which decision is wrong via free-form Other; correct it, then re-show this preview
+
+This pre-write gate itself does NOT count against the budget — it's a write-gate, like the "Keep going?" prompt. Cap at 3 "Wrong" rounds before force-writing with whatever is current.
+
 ### 5. Write `phases/Phase {N}/CONTEXT.md`
-Use the template in @$HOME/.claude/workflows/discuss.md exactly. Include the Q&A log verbatim.
+Use the template in @$HOME/.claude/workflows/discuss.md exactly. Include the Q&A log verbatim. Append a `## Defaults applied` section listing every "I don't know" → chosen default with reason (omit the heading if no defaults were applied).
 
 ### 5a. Also write spec contract(s) when applicable
 - **If AI phase**: write `phases/Phase {N}/AI-SPEC.md` with eval criterion, latency budget, guardrails, failure behavior, cost ceiling. Use the template in workflows/discuss.md. Lightweight — only key dimensions, not exhaustive.
@@ -125,6 +170,9 @@ Suggested next: /psd:plan {N}
 - Never exceed **12 questions total** (7 default + opt-in extension up to 5 more)
 - The "Keep going?" gate after question 7 is mandatory, not optional — even if you'd otherwise stop
 - Clarification responses do NOT count against the budget; cap at 3 clarifications per underlying question
-- Never fabricate; record actual user answers, including clarifications, in the Q&A log
+- The reflect step is **not optional** when triggered (shallow phase goal, prior IDK fire, or vague Other answer); see step 2 trigger conditions
+- The pre-write confirmation in step 4b is **mandatory** — never write CONTEXT.md without it
+- Never record "unknown" without applying a default — always offer 2-3 options with tradeoffs first; log both the IDK and the default with reason
+- Never fabricate; record actual user answers, including clarifications and defaults, in the Q&A log
 - Don't deep-explore the codebase (≤5 file reads); discuss is for *human* clarification, not code archaeology
 - Q&A log entries must be verbatim
