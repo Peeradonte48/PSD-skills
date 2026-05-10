@@ -34,9 +34,9 @@ Orchestrator role: validate state, resolve phase number, gate against accidental
      > FYI: `gsd-ui-phase` is also available — produces a heavier UI-SPEC design contract. Run it directly for design-heavy phases; otherwise continuing with `discuss` (lightweight UI-SPEC.md).
    - If both apply, print both. If neither, skip silently.
 
-3. **Dispatch `discusser`** with the phase number. The discusser owns all UAT-style AskUserQuestion calls.
+3. **Dispatch `discusser`** with the phase number. The discusser owns all UAT-style AskUserQuestion calls. The discusser performs mid-flow reflect on shallow phase goals, applies "I don't know" defaults rather than logging blanks, and always runs a mandatory pre-write summary confirmation before writing CONTEXT.md.
 
 4. **Report** the discusser's ≤200-word summary verbatim. Suggest `/psd:plan {N}` (which will read CONTEXT.md if present).
 
-Preserve all gates: never run `/psd:plan` automatically, never exceed 12 questions (default 7 + opt-in extension), never fabricate decisions, never auto-delegate to companion (suggestion only).
+Preserve all gates: never run `/psd:plan` automatically, never exceed 12 questions (default 7 + opt-in extension), never fabricate decisions, never skip the agent's pre-write confirmation, never auto-delegate to companion (suggestion only).
 </process>
