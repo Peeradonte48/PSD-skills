@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 # Uninstall PSD: remove symlinks and deregister hooks.
+# Leaves $PSD_HOME (~/.psd-skills) on disk so you can re-install with a single
+# `bash $PSD_HOME/install.sh`. Remove it manually with `rm -rf $PSD_HOME` if
+# you want a full purge.
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -29,7 +32,14 @@ for f in "$REPO"/workflows/*.md; do
   remove_link "$HOME/.claude/workflows/$(basename "$f")"
 done
 
-# 2. Deregister hooks (surgical — preserve other hook entries)
+# 2. Remove psd-update binary if it points back to this repo
+for candidate in /usr/local/bin/psd-update "$HOME/.local/bin/psd-update"; do
+  if [ -L "$candidate" ] && [[ "$(readlink "$candidate")" == "$REPO"/bin/psd-update ]]; then
+    rm "$candidate"
+  fi
+done
+
+# 3. Deregister hooks (surgical — preserve other hook entries)
 if [ -f "$SETTINGS" ]; then
   jq --arg cmd "$HOOK_CMD" '
     if (.hooks // {}).PostToolUse then
@@ -42,3 +52,6 @@ if [ -f "$SETTINGS" ]; then
 fi
 
 echo "PSD uninstalled. Restart Claude Code."
+if [ -d "$HOME/.psd-skills" ] && [ "$REPO" = "$HOME/.psd-skills" ]; then
+  echo "Note: $HOME/.psd-skills is preserved. Run 'rm -rf $HOME/.psd-skills' to remove it fully."
+fi

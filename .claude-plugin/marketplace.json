@@ -1,0 +1,12 @@
+{
+  "name": "PSD-skills",
+  "owner": { "name": "Peeradonte48" },
+  "plugins": [
+    {
+      "name": "psd",
+      "version": "0.1.0",
+      "description": "Plan-Ship-Done workflow skills — brainstorm, init, doctor, discuss, plan, execute, verify, review, ship, deploy.",
+      "source": { "type": "git", "path": "." }
+    }
+  ]
+}

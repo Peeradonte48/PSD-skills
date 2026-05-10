@@ -42,23 +42,60 @@ This puts the most expensive model where accuracy matters most (research + plann
 
 ## Install
 
-```bash
-./install.sh
+You don't need to clone the repo. Pick whichever install path fits how you use Claude Code.
+
+### Option A — native Claude Code plugin _(recommended)_
+
+Inside Claude Code:
+
+```
+/plugin marketplace add Peeradonte48/PSD-skills
+/plugin install psd@PSD-skills
 ```
 
-This:
+Skills are namespaced as `psd:psd-brainstorm`, `psd:psd-plan`, etc. The plugin ships its own `hooks/hooks.json`, so the checkpoint hook auto-registers when the plugin is enabled — no `~/.claude/settings.json` edits.
+
+A `SessionStart` hook (`hooks/psd-bridge.sh`) symlinks the plugin's `workflows/*.md` into `~/.claude/workflows/` on every session boot so the skills' `@$HOME/.claude/workflows/...` includes resolve.
+
+### Option B — curl one-liner _(no plugin system; works in any shell)_
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Peeradonte48/PSD-skills/main/install.sh | bash
+```
+
+This auto-clones the repo to `~/.psd-skills/`, then:
+
 1. Symlinks `skills/psd-*/`, `agents/psd-*.md`, `workflows/*.md` into `~/.claude/`
 2. Registers `hooks/psd-checkpoint.sh` in `~/.claude/settings.json` under `PostToolUse` (matched to `Write|Edit|Bash|NotebookEdit`) and `Stop`
+3. Installs a `psd-update` command on your PATH (`/usr/local/bin/` if writable, else `~/.local/bin/`)
+
+Override the install location with `PSD_HOME=/somewhere/else curl ... | bash`.
 
 The hook is a no-op outside `.planning/`-bearing repos, so it's safe to leave globally enabled.
 
-## Uninstall
+### Option C — local clone _(for contributors)_
 
 ```bash
-./uninstall.sh
+git clone https://github.com/Peeradonte48/PSD-skills.git
+cd PSD-skills
+./install.sh
 ```
 
-Removes the symlinks and surgically deletes the hook entries from `~/.claude/settings.json` (leaves your other hooks intact).
+Same behavior as option B but symlinks point at your clone instead of `~/.psd-skills/`. Use this when you're editing the suite itself.
+
+### Don't run both A and B
+
+Installing via plugin _and_ via curl on the same machine registers the checkpoint hook twice (once in the plugin's merged config, once directly in `~/.claude/settings.json`). The PSD skills also appear under two namespaces (`psd:psd-plan` from the plugin, `psd-plan` from the symlink). Pick one. `install.sh` warns when it detects an existing plugin install.
+
+## Update
+
+- **Plugin install:** inside Claude Code, run `/plugin update psd@PSD-skills`
+- **Curl install:** run `psd-update` from any shell (it does `git pull --ff-only` in `~/.psd-skills/` then re-runs `install.sh`)
+
+## Uninstall
+
+- **Plugin install:** `/plugin uninstall psd@PSD-skills`
+- **Curl install:** `~/.psd-skills/uninstall.sh` — removes symlinks, the `psd-update` binary, and surgically deletes the hook entries from `~/.claude/settings.json` (leaves your other hooks intact). The `~/.psd-skills/` directory itself is preserved; remove it manually with `rm -rf ~/.psd-skills` if you want a full purge.
 
 ## Workflow — from idea to live URL
 
