@@ -1,15 +1,15 @@
-# Workflow: psd-plan
+# Workflow: plan
 
 Decompose a phase into atomic plans (one commit each).
 
 ## Pre-flight gates
-1. `.planning/STATE.md` must exist — else tell user to run `/psd-init` first.
+1. `.planning/STATE.md` must exist — else tell user to run `/psd:init` first.
 2. Resolve phase number: if `$ARGUMENTS` is empty, read `STATE.md.active_phase`. Else use the int passed.
 3. If `phases/Phase {N}/PLAN.md` already exists with content → ask user (AskUserQuestion): overwrite, append, or abort.
 
 ## Defaults: accuracy-first
 
-`/psd-plan` is opinionated toward accurate research and planning, since errors here cascade to every downstream phase. **Research and peer-review are ON by default.**
+`/psd:plan` is opinionated toward accurate research and planning, since errors here cascade to every downstream phase. **Research and peer-review are ON by default.**
 
 - `--no-research` — skip research even if it would auto-fire (lean mode for trivial phases or quick re-plans)
 - `--no-peer-review` — skip the adversarial plan reviewer
@@ -27,7 +27,7 @@ Research fires by default. The planner skips it only when ALL of these are true:
 
 Default research depth (raised from earlier "lean" defaults): 5 fetches per target, ≤500-line RESEARCH.md cap. `--deep` raises to 8 fetches and 700 lines.
 
-Triggers (any one fires `psd-researcher`):
+Triggers (any one fires `researcher`):
 1. **Default behavior.** Research fires unless explicitly skipped.
 2. **`--research` flag.** Forces re-research even if RESEARCH.md exists.
 3. **`--deep` flag.** Forces re-research at deep caps.
@@ -39,7 +39,7 @@ Skip conditions:
 2. `--from-failure` mode AND failure is logic-only (not knowledge gap).
 3. `phases/Phase {N}/RESEARCH.md` exists AND no force-flag.
 
-When research fires, the planner waits for `psd-researcher` to complete and produce `phases/Phase {N}/RESEARCH.md` before continuing. The planner then treats RESEARCH.md's "Guidance for the planner" section as **binding directives** for every atomic plan that touches a researched library/API.
+When research fires, the planner waits for `researcher` to complete and produce `phases/Phase {N}/RESEARCH.md` before continuing. The planner then treats RESEARCH.md's "Guidance for the planner" section as **binding directives** for every atomic plan that touches a researched library/API.
 
 Full research protocol: @$HOME/.claude/workflows/research.md.
 
@@ -77,7 +77,7 @@ This step is **always on**. It costs no LLM tokens (pure deterministic checks) a
 
 ## Peer-review sub-step (after plan-checker passes, before reporting "done")
 
-Default behavior: **peer-review fires unless `--no-peer-review` was passed.** It dispatches `psd-plan-reviewer` in a fresh adversarial context. The reviewer reads PLAN.md / CONTEXT.md / RESEARCH.md / specs / PROJECT.md and surfaces concerns in ≤200 words.
+Default behavior: **peer-review fires unless `--no-peer-review` was passed.** It dispatches `plan-reviewer` in a fresh adversarial context. The reviewer reads PLAN.md / CONTEXT.md / RESEARCH.md / specs / PROJECT.md and surfaces concerns in ≤200 words.
 
 The planner then either:
 - **Addresses each concern** by modifying PLAN.md (re-order plans, split big plans, add missing coverage, etc.), OR
@@ -100,7 +100,7 @@ If `.planning/LESSONS.md` exists, the planner reads its `## Active` section and 
 
 Lessons are **advisory only**, never binding. If no lessons apply, omit the sub-section entirely (don't write "none applicable" — keep PLAN.md clean).
 
-Order of sub-steps inside `psd-plan`:
+Order of sub-steps inside `plan`:
 1. Research (default ON, unless `--no-research`) → produce RESEARCH.md
 2. Write PLAN.md + per-plan files
 3. **Plan-checker (always)** → fix or surface defects
@@ -110,16 +110,16 @@ Order of sub-steps inside `psd-plan`:
 7. Done
 
 ## Subagent dispatch
-Spawn `psd-planner`. **Pass only paths**, not content:
+Spawn `planner`. **Pass only paths**, not content:
 
 ```
-You are psd-planner for Phase {N}.
+You are planner for Phase {N}.
 
 Read these files yourself (do not expect them to be in context):
 - .planning/PROJECT.md
 - .planning/ROADMAP.md (focus on Phase {N})
 - .planning/STATE.md
-- .planning/phases/Phase {N}/CONTEXT.md (IF IT EXISTS — output of /psd-discuss; binding decisions, hard constraints, edge cases punted)
+- .planning/phases/Phase {N}/CONTEXT.md (IF IT EXISTS — output of /psd:discuss; binding decisions, hard constraints, edge cases punted)
 - existing source code (use Glob/Grep/Read)
 
 Read @$HOME/.claude/workflows/plan.md for the spec.
@@ -194,13 +194,13 @@ If invoked with `--from-failure` or when `VERIFICATION.md` shows failures, the p
 
 ## Auto-preview + approval gate (final step before reporting "done")
 
-Same shape as `psd-init`'s auto-preview loop, but mode `"phase N"`:
+Same shape as `init`'s auto-preview loop, but mode `"phase N"`:
 
-1. After PLAN.md and per-plan files are written, dispatch `psd-previewer` in mode `"phase {N}"`.
+1. After PLAN.md and per-plan files are written, dispatch `previewer` in mode `"phase {N}"`.
 2. Show the plain-English narrative to the user verbatim.
 3. AskUserQuestion: "Does this match what you want for Phase {N}?"
-   - **Yes, ship it** → proceed to "done" reporting; suggest `/psd-execute {N}` next
-   - **Revise — change something** → ask what to change; re-dispatch `psd-planner` in revision mode with the feedback; loop back to step 1
+   - **Yes, ship it** → proceed to "done" reporting; suggest `/psd:execute {N}` next
+   - **Revise — change something** → ask what to change; re-dispatch `planner` in revision mode with the feedback; loop back to step 1
    - **Abort** → leave PLAN.md as-is, do NOT advance state, tell the user the plan is written but not approved
 4. **Max 2 revision rounds.** Third "Revise" → forced choice: ship or abort.
 
@@ -210,7 +210,7 @@ This catches "the planner heard 'leaderboard' but I really meant 'just my own st
 - `phases/Phase {N}/PLAN.md` exists with a plan table
 - `phases/Phase {N}/plans/` contains one file per plan, all with frontmatter
 - The user has approved the plain-English preview (or explicitly aborted)
-- `STATE.md` updated: `last_skill: psd-plan`, append decision: "Phase {N} planned with X plans"
+- `STATE.md` updated: `last_skill: plan`, append decision: "Phase {N} planned with X plans"
 
 ## Failure modes
 - Planner returns 0 plans → likely misread the phase scope; report and ask user to clarify

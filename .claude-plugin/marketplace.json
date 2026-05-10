@@ -4,7 +4,7 @@
   "plugins": [
     {
       "name": "psd",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "description": "Plan-Ship-Done workflow skills — brainstorm, init, doctor, discuss, plan, execute, verify, review, ship, deploy.",
       "source": "./"
     }

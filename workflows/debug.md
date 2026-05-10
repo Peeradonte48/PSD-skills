@@ -1,4 +1,4 @@
-# Workflow: psd-debug
+# Workflow: debug
 
 Diagnose and fix something broken. Works inside or outside a PSD project. Always asks for confirmation before applying a fix — safer for non-technical users.
 
@@ -13,10 +13,10 @@ Diagnose and fix something broken. Works inside or outside a PSD project. Always
 - Working tree may be dirty (often is, that's why we're debugging).
 
 ## Subagent dispatch
-Spawn `psd-debugger`:
+Spawn `debugger`:
 
 ```
-You are psd-debugger.
+You are debugger.
 
 User's symptom: <$ARGUMENTS verbatim, free text>
 
@@ -71,7 +71,7 @@ Report back in <=200 words: symptom restated, root cause one-liner, fix applied 
 ## State touch (minimal)
 After a successful debug-and-apply:
 - If `.planning/STATE.md` exists, append to "Recent decisions": `Debug fix <ISO date>: <one-line symptom> → <commit sha>`
-- Do NOT change `last_skill` (keep whatever was active so `psd-resume` can return to the in-flight phase). Optionally add a `last_debug: <commit sha>` line.
+- Do NOT change `last_skill` (keep whatever was active so `resume` can return to the in-flight phase). Optionally add a `last_debug: <commit sha>` line.
 
 ## Why ask before applying?
 Non-technical users get burned by silent "fixes" that change semantics they didn't expect. The 5-second confirmation step is cheap insurance and turns the debugger into a teaching tool ("here's what I think and why").
@@ -79,4 +79,4 @@ Non-technical users get burned by silent "fixes" that change semantics they didn
 ## Failure modes
 - User can't describe the symptom clearly → ask one clarifying question, then if still vague, suggest they paste the literal error text
 - Hypothesis cycles exhausted → report stuck (don't keep guessing)
-- Applied fix didn't actually fix it → report; user can run `/psd-debug` again with the new symptom; if the fix made things worse, suggest `git revert HEAD`
+- Applied fix didn't actually fix it → report; user can run `/psd:debug` again with the new symptom; if the fix made things worse, suggest `git revert HEAD`

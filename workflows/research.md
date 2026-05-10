@@ -1,8 +1,8 @@
-# Workflow: psd-research (sub-step, not a user-facing skill)
+# Workflow: research (sub-step, not a user-facing skill)
 
-Library/API/pattern research that runs **before** `psd-plan` when the planner detects a knowledge gap. Produces `.planning/phases/Phase {N}/RESEARCH.md` consumed by the planner.
+Library/API/pattern research that runs **before** `plan` when the planner detects a knowledge gap. Produces `.planning/phases/Phase {N}/RESEARCH.md` consumed by the planner.
 
-This is **not** a user-facing skill. There is no `/psd-research` slash command. The research happens automatically as a sub-step of `/psd-plan` when triggered.
+This is **not** a user-facing skill. There is no `/research` slash command. The research happens automatically as a sub-step of `/psd:plan` when triggered.
 
 ## Trigger conditions (any one fires the researcher)
 
@@ -34,10 +34,10 @@ Use `--deep` when the phase touches a complex new framework or an integration wh
 2. The planner is in `--from-failure` mode and the failure isn't research-related (it's a logic bug, not a missing-knowledge bug).
 
 ## Subagent dispatch
-Spawn `psd-researcher`:
+Spawn `researcher`:
 
 ```
-You are psd-researcher for Phase {N}.
+You are researcher for Phase {N}.
 
 Read yourself:
 - .planning/PROJECT.md (Stack section + Vision)
@@ -64,7 +64,7 @@ Read @$HOME/.claude/workflows/research.md.
 
 Write phases/Phase {N}/RESEARCH.md per the template. Cap at ~300 lines total. Each target's section ≤80 lines.
 
-Report back in <=200 words: target list, top finding per target, suggested next: /psd-plan {N}.
+Report back in <=200 words: target list, top finding per target, suggested next: /psd:plan {N}.
 ```
 
 ## Artifact template

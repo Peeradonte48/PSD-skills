@@ -1,14 +1,14 @@
-# Workflow: psd-execute
+# Workflow: execute
 
 Execute every atomic plan in a phase, one commit per plan.
 
 ## Pre-flight gates
-1. `phases/Phase {N}/PLAN.md` must exist — else tell user to run `/psd-plan {N}`.
+1. `phases/Phase {N}/PLAN.md` must exist — else tell user to run `/psd:plan {N}`.
 2. Working tree must be clean (`git status --porcelain` empty) — else ask user to commit/stash first.
 3. Read PLAN.md's wave plan to determine execution order.
 
 ## Execution model
-- Each atomic plan gets its own **fresh `psd-executor` subagent context**.
+- Each atomic plan gets its own **fresh `executor` subagent context**.
 - Plans within a wave run in parallel (multiple Task calls in one assistant message).
 - Waves run sequentially: wait for wave K to finish before starting wave K+1.
 - One plan = one commit. Commit message = the plan's `Commit message` field.
@@ -17,7 +17,7 @@ Execute every atomic plan in a phase, one commit per plan.
 For each plan ID `{N}-NN` in the current wave:
 
 ```
-You are psd-executor for plan {N}-NN.
+You are executor for plan {N}-NN.
 
 Read yourself:
 - .planning/phases/Phase {N}/plans/{N}-NN.md (your spec)
@@ -62,11 +62,11 @@ Report back in <=200 words:
 
 ## Post-conditions
 - One git commit per plan (verifiable: `git log --oneline | wc -l` increased by N)
-- `STATE.md` updated: `last_skill: psd-execute`, decision entry like "Phase {N} executed: X commits"
+- `STATE.md` updated: `last_skill: execute`, decision entry like "Phase {N} executed: X commits"
 - Working tree clean
 
 ## Recovery
 If interrupted mid-wave (token limit, network):
 - The PostToolUse hook has captured `CHECKPOINT.md` snapshots after each commit.
-- `/psd-resume` will see committed plans and report which IDs are done vs. pending.
-- Re-running `/psd-execute {N}` after resume should be **idempotent**: it skips plans whose commit already exists (detected via `git log --grep "<plan title>"` or by checking files were modified).
+- `/psd:resume` will see committed plans and report which IDs are done vs. pending.
+- Re-running `/psd:execute {N}` after resume should be **idempotent**: it skips plans whose commit already exists (detected via `git log --grep "<plan title>"` or by checking files were modified).

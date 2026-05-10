@@ -1,10 +1,10 @@
-# Workflow: psd-add-tests
+# Workflow: add-tests
 
-Generate automated tests from a phase's `VERIFICATION.md` criteria. Opt-in skill that runs **after `psd-verify`** and **before `psd-ship`**. Skipped if the project has no detectable test framework.
+Generate automated tests from a phase's `VERIFICATION.md` criteria. Opt-in skill that runs **after `verify`** and **before `ship`**. Skipped if the project has no detectable test framework.
 
 ## Why this exists
 
-Manual UAT (`psd-verify`) confirms the phase works once. Automated tests prevent regression. For non-technical users especially, "I don't know how to write tests" shouldn't mean "no regression coverage."
+Manual UAT (`verify`) confirms the phase works once. Automated tests prevent regression. For non-technical users especially, "I don't know how to write tests" shouldn't mean "no regression coverage."
 
 The tester reads passing UAT criteria and writes one test per critical criterion in the project's existing framework. It does NOT achieve high coverage — that's a separate concern.
 
@@ -18,10 +18,10 @@ The tester reads passing UAT criteria and writes one test per critical criterion
 4. **Skip-path:** if `phases/Phase {N}/.tests-generated` marker exists AND `--force` not passed → "Tests already generated. Pass --force to regenerate." and exit.
 
 ## Subagent dispatch
-Spawn `psd-tester`:
+Spawn `tester`:
 
 ```
-You are psd-tester for Phase {N}.
+You are tester for Phase {N}.
 
 Read yourself:
 - phases/Phase {N}/PLAN.md (success criteria, plan list)
@@ -55,9 +55,9 @@ Report back in <=200 words: tests written (count), pass count, any TODOs, commit
 
 ## Hand-off
 
-Tests are committed as `test: phase {N} criteria coverage`. They land in the same branch as the phase work, so `psd-ship` includes them in the PR automatically.
+Tests are committed as `test: phase {N} criteria coverage`. They land in the same branch as the phase work, so `ship` includes them in the PR automatically.
 
-`psd-ship`'s PR body template includes "Test plan" — when `.tests-generated` exists, the shipper notes "Automated tests added (`tests: <count>`); see `<test files>`."
+`ship`'s PR body template includes "Test plan" — when `.tests-generated` exists, the shipper notes "Automated tests added (`tests: <count>`); see `<test files>`."
 
 ## Hard rules
 - **Don't modify source files.** Tests only.

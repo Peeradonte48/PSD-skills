@@ -1,18 +1,18 @@
-# Workflow: psd-discuss
+# Workflow: discuss
 
-Per-phase clarification BEFORE `/psd-plan {N}`. Adaptive 3-7 question dialogue that captures decisions, constraints, and edge cases — written to `phases/Phase {N}/CONTEXT.md` for the planner to consume.
+Per-phase clarification BEFORE `/psd:plan {N}`. Adaptive 3-7 question dialogue that captures decisions, constraints, and edge cases — written to `phases/Phase {N}/CONTEXT.md` for the planner to consume.
 
 ## Pre-flight gates
-1. `.planning/STATE.md` must exist — else suggest `/psd-init`.
+1. `.planning/STATE.md` must exist — else suggest `/psd:init`.
 2. Resolve phase number: if `$ARGUMENTS` empty, read `STATE.active_phase`; else use the int passed.
 3. Phase {N} must exist in ROADMAP.md.
 4. If `phases/Phase {N}/CONTEXT.md` already exists → AskUserQuestion: continue/refine | overwrite | abort.
 
 ## Subagent dispatch
-Spawn `psd-discusser`:
+Spawn `discusser`:
 
 ```
-You are psd-discusser for Phase {N}.
+You are discusser for Phase {N}.
 
 Read yourself:
 - .planning/PROJECT.md (skim — top of file is enough)
@@ -26,10 +26,10 @@ Read @$HOME/.claude/workflows/discuss.md for the protocol.
 Tasks:
 1. Identify what's unclear about Phase {N}: behavior gaps, dependencies, edge cases, success metric.
 2. Ask 3-7 ADAPTIVE questions via AskUserQuestion targeting only the unclear dimensions.
-3. Stop when you have enough to feed psd-planner — typically: scope edges, hard constraints, dependency on other phases, edge cases worth handling, edge cases explicitly punted.
+3. Stop when you have enough to feed planner — typically: scope edges, hard constraints, dependency on other phases, edge cases worth handling, edge cases explicitly punted.
 4. Write phases/Phase {N}/CONTEXT.md per template below.
 
-Report back in <=200 words: distilled decisions + suggested /psd-plan {N}.
+Report back in <=200 words: distilled decisions + suggested /psd:plan {N}.
 ```
 
 ## What "adaptive" means (binding, same as brainstorm)
@@ -76,7 +76,7 @@ When the user selects "Other" on any AskUserQuestion and their typed text is a *
 
 ### Rules
 - Clarification responses **do NOT count against the question budget.**
-- **Cap at 3 clarification rounds per single underlying question** — if the user is still confused after 3 explanations, the agent picks the safest default with a one-line rationale ("I'll go with X for v1; we can revisit in psd-plan if it doesn't fit") and continues. The user's "I don't know what to pick" answer is logged in the Q&A log for traceability.
+- **Cap at 3 clarification rounds per single underlying question** — if the user is still confused after 3 explanations, the agent picks the safest default with a one-line rationale ("I'll go with X for v1; we can revisit in plan if it doesn't fit") and continues. The user's "I don't know what to pick" answer is logged in the Q&A log for traceability.
 - Clarifications are logged in CONTEXT.md's Q&A log as nested entries under the parent question.
 
 ### Q&A log format with clarification
@@ -248,15 +248,15 @@ WCAG <AA | A>: keyboard-navigable, focus-visible, sufficient contrast, alt text 
 - Existing component this should match style with: <path or "n/a">
 ```
 
-## Hand-off to psd-plan
-- `psd-plan` reads CONTEXT.md; if present, `psd-planner` treats Decisions and Hard constraints as **binding**.
-- `psd-plan` ALSO reads `AI-SPEC.md` and/or `UI-SPEC.md` if they exist; the planner treats spec criteria as binding (every plan that touches AI/UI must reflect the relevant spec).
-- The reviewer (`psd-review`) checks plans against AI-SPEC / UI-SPEC criteria.
-- If CONTEXT.md is missing, `psd-plan` proceeds anyway (discuss is optional).
+## Hand-off to plan
+- `plan` reads CONTEXT.md; if present, `planner` treats Decisions and Hard constraints as **binding**.
+- `plan` ALSO reads `AI-SPEC.md` and/or `UI-SPEC.md` if they exist; the planner treats spec criteria as binding (every plan that touches AI/UI must reflect the relevant spec).
+- The reviewer (`review`) checks plans against AI-SPEC / UI-SPEC criteria.
+- If CONTEXT.md is missing, `plan` proceeds anyway (discuss is optional).
 
 ## Hard rules
 - Never write source code or plan files
-- Never run `/psd-plan` yourself — only suggest it
+- Never run `/psd:plan` yourself — only suggest it
 - Never exceed 7 questions
 - Never fabricate decisions; record what the user actually said
 - Q&A log entries must be verbatim

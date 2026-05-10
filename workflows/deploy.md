@@ -1,16 +1,16 @@
-# Workflow: psd-deploy
+# Workflow: deploy
 
-Push to a live URL. Closes the loop from `/psd-ship` (which only opens a PR) to "I can show this to a friend."
+Push to a live URL. Closes the loop from `/psd:ship` (which only opens a PR) to "I can show this to a friend."
 
 Thin orchestrator: delegates to `vercel:deploy` companion when present, else `deploy-to-vercel`, else direct `vercel deploy` bash.
 
 ## When to run
-- Auto-suggested by `psd-ship` in its "Quality gates this phase" block
+- Auto-suggested by `ship` in its "Quality gates this phase" block
 - After PR merge to push production deploy (`--prod`)
-- For first-time deploy of a new project (uses `psd-doctor` if env not ready)
+- For first-time deploy of a new project (uses `doctor` if env not ready)
 
 ## Pre-flight gates
-1. `.planning/DOCTOR.md` exists AND `Verdict: READY` — else direct user to `/psd-doctor` first.
+1. `.planning/DOCTOR.md` exists AND `Verdict: READY` — else direct user to `/psd:doctor` first.
 2. Working tree clean for `--prod` deploys; preview deploys allow dirty (Vercel previews from current commit).
 
 ## Args
@@ -20,10 +20,10 @@ Thin orchestrator: delegates to `vercel:deploy` companion when present, else `de
 - `--phase N` — record the deploy URL specifically for Phase N's SUMMARY.md (default: write to top-level DEPLOY.md only)
 
 ## Subagent dispatch
-Spawn `psd-deployer`:
+Spawn `deployer`:
 
 ```
-You are psd-deployer.
+You are deployer.
 
 Inputs:
 - target: <"preview" | "production">
@@ -57,9 +57,9 @@ Report back in <=200 words: target, URL, smoke-test result, where it's recorded.
 
 If `vercel:deploy` is in the available-skills list, the orchestrator prints a one-line FYI before dispatching:
 
-> FYI: `vercel:deploy` is also available — direct Vercel deploy. Continuing with `psd-deploy` (which orchestrates around it).
+> FYI: `vercel:deploy` is also available — direct Vercel deploy. Continuing with `deploy` (which orchestrates around it).
 
-`psd-deployer` itself uses `vercel:deploy` as its first-choice deploy mechanism if installed.
+`deployer` itself uses `vercel:deploy` as its first-choice deploy mechanism if installed.
 
 ## Smoke test
 

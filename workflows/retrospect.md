@@ -1,6 +1,6 @@
-# Workflow: psd-retrospector
+# Workflow: retrospector
 
-Auto-extract obstacles from a completed phase so the next phase's planner doesn't repeat them. Runs as a sub-step of `/psd-ship`, never as a user-facing slash command.
+Auto-extract obstacles from a completed phase so the next phase's planner doesn't repeat them. Runs as a sub-step of `/psd:ship`, never as a user-facing slash command.
 
 ## Why this exists
 
@@ -100,7 +100,7 @@ _No obstacles recorded — clean phase._
 If sources missing:
 
 ```markdown
-_Sources unavailable: REVIEW.md (not produced — /psd-review was not run)_
+_Sources unavailable: REVIEW.md (not produced — /psd:review was not run)_
 ```
 
 ## Rollup file template
@@ -145,7 +145,7 @@ Per-phase files (`phases/Phase {N}/LESSONS.md`) are **immutable convention** pos
 
 ## Cross-milestone archive
 
-When `/psd-new-milestone` runs, `psd-milestoner`:
+When `/psd:new-milestone` runs, `milestoner`:
 1. `git mv .planning/LESSONS.md .planning/milestones/v{N}/LESSONS.md`
 2. The new milestone starts with **no rollup** — it's recreated on the first ship of v{N+1}.
 3. The "Aggregate lessons" section in `milestones/v{N}/SUMMARY.md` sources its 3-5 distilled bullets **from the per-phase LESSONS.md files** (not freehand).
@@ -158,5 +158,5 @@ Persistent architectural lessons (e.g., "always use idempotent middleware") that
 - **All sources missing** → `_Sources unavailable: <list>_` in per-phase file. No rollup write. Never block ship.
 - **>5 raw obstacles** → cap at 5; report `5 captured (M dropped)` to shipper.
 - **Source-citation missing on a lesson** → drop the record at write time; never escape the agent.
-- **Retrospector timeout (60s)** → `/psd-ship` proceeds; shipper reports `Lessons: not captured — timeout`.
+- **Retrospector timeout (60s)** → `/psd:ship` proceeds; shipper reports `Lessons: not captured — timeout`.
 - **Rollup body has user-moved entries** → respect them; only rewrite the AUTO index block.

@@ -19,7 +19,7 @@ ts=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 dirty=$(git status --porcelain 2>/dev/null | head -10)
 dirty_count=$(printf '%s\n' "$dirty" | grep -c . 2>/dev/null || echo 0)
 
-# Ensure header exists (first hook fire after psd-init may predate the file).
+# Ensure header exists (first hook fire after init may predate the file).
 if [ ! -f "$CP" ]; then
   cat > "$CP" <<'EOF'
 # Checkpoint log
@@ -57,7 +57,7 @@ fi
 } > "$CP.tmp" 2>/dev/null && mv "$CP.tmp" "$CP" 2>/dev/null
 
 # --- Part 2: refresh AGENTS.md auto-block ------------------------------------
-# Skip silently if AGENTS.md missing (project not yet psd-init'd) or sentinels absent.
+# Skip silently if AGENTS.md missing (project not yet init'd) or sentinels absent.
 if [ -f AGENTS.md ] && grep -q '<!-- AUTO:CURRENT_STATE -->' AGENTS.md && grep -q '<!-- /AUTO:CURRENT_STATE -->' AGENTS.md; then
   milestone=$(grep '^- milestone:' .planning/STATE.md 2>/dev/null | awk '{print $3}' || echo "-")
   active=$(grep '^- active_phase:' .planning/STATE.md 2>/dev/null | awk '{print $3}' || echo "-")

@@ -12,28 +12,28 @@ The orchestrator scans the available-skills list (provided in the system reminde
 
 | PSD skill | Companion | Surface condition | Prefer companion when... | Prefer PSD when... |
 |---|---|---|---|---|
-| `/psd-brainstorm` | `superpowers:brainstorming` | always | More rigorous exploration of intent; user has a foggy idea and wants depth | Lean ideation, want a structured BRAINSTORM.md ready for `/psd-init` |
-| `/psd-debug` | `superpowers:systematic-debugging` | always | Tough bug, scientific-method discipline matters; willing to spend more tokens | Quick targeted fix; want plain-English propose-then-confirm flow |
-| `/psd-add-tests` | `superpowers:test-driven-development` | always | Building a new feature test-first; want full TDD discipline | Adding tests retroactively from a passing VERIFICATION.md |
-| `/psd-review` | `code-review:code-review` | A PR exists for this branch | You're reviewing the PR in GitHub-context | Local diff-scoped review before opening a PR |
-| `/psd-execute` | `superpowers:using-git-worktrees` | Phase has multiple waves OR touches risky paths (auth/payments/migrations) | Want isolation from main branch; comparing variants | Standard in-branch execution |
-| `/psd-discuss [N]` (AI) | `gsd-ai-integration-phase` | Phase goal/Stack mentions AI/LLM/agent/embedding/RAG | AI-critical phase needing eval rigor + monitoring contract | Lightweight AI-SPEC.md alongside CONTEXT.md |
-| `/psd-discuss [N]` (UI) | `gsd-ui-phase` | Phase goal mentions page/screen/layout/design/UX | Design-heavy phase needing thorough design contract | Lightweight UI-SPEC.md alongside CONTEXT.md |
-| `/psd-plan [N]` (AI) | `gsd-ai-integration-phase` | Same AI condition as discuss | Run before `/psd-plan` to lock down the AI-SPEC | Lean phase plan |
-| `/psd-plan [N]` (UI) | `gsd-ui-phase` | Same UI condition as discuss | Run before `/psd-plan` to lock down the UI-SPEC | Lean phase plan |
-| `/psd-init` | `gsd-new-project` | always | Want extensive parallel-research project bootstrap | Lean, batteries-included defaults; ready to ship Phase 1 fast |
-| `/psd-doctor` | `vercel:bootstrap` | Stack mentions Vercel AND `.vercel/project.json` absent | First-time Vercel + linked-resource setup with Marketplace integrations | Manual `vercel link` + per-service env walkthrough |
-| `/psd-doctor` | `vercel:env` | Vercel linked AND `.env.local` exists | Direct Vercel env management (pull/push/diff) | PSD's guided per-service walkthrough |
-| `/psd-doctor` | `vercel:status` | Vercel linked | Quick state check (deployments, domains, env) | PSD's verbose per-tool check |
-| `/psd-doctor` | `supabase:supabase` | Stack mentions Supabase | Direct Supabase MCP for migrations, RLS, edge functions | PSD's guided link + service-role-key walkthrough |
-| `/psd-deploy` | `vercel:deploy` | always | Direct Vercel deploy | PSD adds smoke test + DEPLOY.md + AGENTS.md update |
-| `/psd-deploy` | `deploy-to-vercel` | when `vercel:deploy` not present | Generic deploy trigger | Same — just a fallback companion |
+| `/psd:brainstorm` | `superpowers:brainstorming` | always | More rigorous exploration of intent; user has a foggy idea and wants depth | Lean ideation, want a structured BRAINSTORM.md ready for `/psd:init` |
+| `/psd:debug` | `superpowers:systematic-debugging` | always | Tough bug, scientific-method discipline matters; willing to spend more tokens | Quick targeted fix; want plain-English propose-then-confirm flow |
+| `/psd:add-tests` | `superpowers:test-driven-development` | always | Building a new feature test-first; want full TDD discipline | Adding tests retroactively from a passing VERIFICATION.md |
+| `/psd:review` | `code-review:code-review` | A PR exists for this branch | You're reviewing the PR in GitHub-context | Local diff-scoped review before opening a PR |
+| `/psd:execute` | `superpowers:using-git-worktrees` | Phase has multiple waves OR touches risky paths (auth/payments/migrations) | Want isolation from main branch; comparing variants | Standard in-branch execution |
+| `/psd:discuss [N]` (AI) | `gsd-ai-integration-phase` | Phase goal/Stack mentions AI/LLM/agent/embedding/RAG | AI-critical phase needing eval rigor + monitoring contract | Lightweight AI-SPEC.md alongside CONTEXT.md |
+| `/psd:discuss [N]` (UI) | `gsd-ui-phase` | Phase goal mentions page/screen/layout/design/UX | Design-heavy phase needing thorough design contract | Lightweight UI-SPEC.md alongside CONTEXT.md |
+| `/psd:plan [N]` (AI) | `gsd-ai-integration-phase` | Same AI condition as discuss | Run before `/psd:plan` to lock down the AI-SPEC | Lean phase plan |
+| `/psd:plan [N]` (UI) | `gsd-ui-phase` | Same UI condition as discuss | Run before `/psd:plan` to lock down the UI-SPEC | Lean phase plan |
+| `/psd:init` | `gsd-new-project` | always | Want extensive parallel-research project bootstrap | Lean, batteries-included defaults; ready to ship Phase 1 fast |
+| `/psd:doctor` | `vercel:bootstrap` | Stack mentions Vercel AND `.vercel/project.json` absent | First-time Vercel + linked-resource setup with Marketplace integrations | Manual `vercel link` + per-service env walkthrough |
+| `/psd:doctor` | `vercel:env` | Vercel linked AND `.env.local` exists | Direct Vercel env management (pull/push/diff) | PSD's guided per-service walkthrough |
+| `/psd:doctor` | `vercel:status` | Vercel linked | Quick state check (deployments, domains, env) | PSD's verbose per-tool check |
+| `/psd:doctor` | `supabase:supabase` | Stack mentions Supabase | Direct Supabase MCP for migrations, RLS, edge functions | PSD's guided link + service-role-key walkthrough |
+| `/psd:deploy` | `vercel:deploy` | always | Direct Vercel deploy | PSD adds smoke test + DEPLOY.md + AGENTS.md update |
+| `/psd:deploy` | `deploy-to-vercel` | when `vercel:deploy` not present | Generic deploy trigger | Same — just a fallback companion |
 
 ## Surface format (binding)
 
 When a companion is detected, the orchestrator prints a single line like:
 
-> `FYI: \`<companion>\` is also available — <one-line tradeoff>. Run it directly if you'd prefer; otherwise continuing with \`<psd-skill>\`.`
+> `FYI: \`<companion>\` is also available — <one-line tradeoff>. Run it directly if you'd prefer; otherwise continuing with \`<psd:skill>\`.`
 
 The line is informational only. The PSD skill continues to its normal subagent dispatch immediately after — no AskUserQuestion, no pause. The user can `Ctrl+C` if they want to switch.
 

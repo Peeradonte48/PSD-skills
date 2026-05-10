@@ -1,8 +1,8 @@
-# Workflow: psd-review
+# Workflow: review
 
 Lightweight code review + security check + eval audit on a phase's diff. One subagent does all three. Reads ONLY changed files for the phase (not the whole codebase). Produces `phases/Phase {N}/REVIEW.md` with findings tagged P0 / P1 / P2.
 
-This is the missing-but-cheap quality gate. It runs **after `psd-execute`** and **before `psd-ship`** as an opt-in safety net.
+This is the missing-but-cheap quality gate. It runs **after `execute`** and **before `ship`** as an opt-in safety net.
 
 ## Pre-flight gates
 1. `.planning/phases/Phase {N}/PLAN.md` must exist.
@@ -18,10 +18,10 @@ Source the file list from the union of `files:` lists in `phases/Phase {N}/plans
 Cap at 25 changed files. If more, review the most recent 25 and flag "review truncated; re-run with smaller diffs."
 
 ## Subagent dispatch
-Spawn `psd-reviewer`:
+Spawn `reviewer`:
 
 ```
-You are psd-reviewer for Phase {N}.
+You are reviewer for Phase {N}.
 
 Read yourself:
 - phases/Phase {N}/PLAN.md (success criteria + per-plan list)
@@ -32,7 +32,7 @@ Read yourself:
 
 Read @$HOME/.claude/workflows/review.md for the protocol.
 
-Run THREE light checks per file (see psd-reviewer agent for the checklist).
+Run THREE light checks per file (see reviewer agent for the checklist).
 
 Write phases/Phase {N}/REVIEW.md per the template below.
 
@@ -77,14 +77,14 @@ The reviewer **never auto-fixes**. Only reports. User decides what to address.
 - <criterion>: <met | partial | missing> — <evidence>
 ```
 
-## Hand-off to psd-ship
+## Hand-off to ship
 
-`psd-ship` reads REVIEW.md (if exists) and:
+`ship` reads REVIEW.md (if exists) and:
 - If verdict is `NEEDS-FIXES` and any P0 unchecked → BLOCK ship and tell user to fix
 - If P1s unchecked → warn but allow ship (user decision)
 - If verdict is `CLEAR` → proceed normally
 
-Findings can be checked off (`- [ ]` → `- [x]`) by `psd-debug` when fixes land.
+Findings can be checked off (`- [ ]` → `- [x]`) by `debug` when fixes land.
 
 ## Hard rules
 - **Read-only file inspection.** Never auto-fix. Never edit source.

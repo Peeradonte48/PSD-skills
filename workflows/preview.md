@@ -1,19 +1,19 @@
-# Workflow: psd-preview
+# Workflow: preview
 
 Translate the technical planning artifacts (`ROADMAP.md`, `PLAN.md`, per-plan files) into **plain-English narrative** that a non-technical user can understand and react to. Read-only. Two trigger modes:
 
-1. **Standalone** — user invokes `/psd-preview` (whole roadmap) or `/psd-preview [N]` (single phase) for re-viewing.
-2. **Auto-gated** — `psd-init` and `psd-plan` invoke this internally as their final step before reporting "done." If the user rejects the preview, the orchestrating skill loops back to revise (max 2 revision rounds).
+1. **Standalone** — user invokes `/psd:preview` (whole roadmap) or `/psd:preview [N]` (single phase) for re-viewing.
+2. **Auto-gated** — `init` and `plan` invoke this internally as their final step before reporting "done." If the user rejects the preview, the orchestrating skill loops back to revise (max 2 revision rounds).
 
 ## Pre-flight (standalone only)
-1. `.planning/` must exist — else suggest `/psd-init`.
+1. `.planning/` must exist — else suggest `/psd:init`.
 2. If `[N]` is passed: `.planning/phases/Phase {N}/PLAN.md` should exist (preview phase from PLAN.md). If not, fall back to ROADMAP.md's Phase {N} entry (preview phase from roadmap).
 
 ## Subagent dispatch
-Spawn `psd-previewer`:
+Spawn `previewer`:
 
 ```
-You are psd-previewer. Read-only narrative translator.
+You are previewer. Read-only narrative translator.
 
 Mode:
 - "all" → narrate the whole ROADMAP.md (every phase)
@@ -95,18 +95,18 @@ When narrating, replace technical jargon with user-facing equivalents:
 
 If a phase plan is *only* refactor/infrastructure with no user-visible outcome, flag it: "This phase is technical setup — no new feature. Result: faster/safer changes later." That's a yellow flag the user might want to question.
 
-## Auto-gate behavior (when called from psd-init or psd-plan)
+## Auto-gate behavior (when called from init or plan)
 
 The orchestrator (init or plan skill):
-1. Dispatches `psd-previewer` to generate the narrative
+1. Dispatches `previewer` to generate the narrative
 2. Shows the narrative to the user verbatim
 3. AskUserQuestion: "Does this match what you want?"
    - **Yes, ship it** → orchestrator continues to "done"
-   - **Revise — let me change something** → ask what to change (free-text or AskUserQuestion); re-dispatch the relevant write-subagent (`psd-initializer` for roadmap edits, `psd-planner` for phase plan edits) with the revision feedback; loop back to step 1
+   - **Revise — let me change something** → ask what to change (free-text or AskUserQuestion); re-dispatch the relevant write-subagent (`initializer` for roadmap edits, `planner` for phase plan edits) with the revision feedback; loop back to step 1
    - **Abort** → leave artifacts as-is, don't auto-advance state, tell user how to resume manually
 4. **Max 2 revision rounds.** On the third "Revise" answer, force the user to choose between "Yes, ship what we have" or "Abort." This prevents infinite loops on indecisive users.
 
-The auto-gate adds 1-3 questions to the user's flow but is the safety net for non-technical users who otherwise wouldn't know to run `/psd-preview` themselves.
+The auto-gate adds 1-3 questions to the user's flow but is the safety net for non-technical users who otherwise wouldn't know to run `/psd:preview` themselves.
 
 ## Hard rules
 - **Read-only.** Never write any file.

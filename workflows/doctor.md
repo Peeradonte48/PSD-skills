@@ -1,23 +1,23 @@
-# Workflow: psd-doctor
+# Workflow: doctor
 
 Environment health check + first-time provisioning + `.env` walkthrough. The bridge between "PSD wrote `Stack: Next.js + Vercel + Supabase` in PROJECT.md" and "user can actually run/deploy the project."
 
 Designed for non-technical users — verbose, plain-English, walks through each missing piece with copy-paste install commands.
 
 ## When to run
-- Auto-suggested by `psd-init` after init completes
-- Before first `/psd-deploy` (deploy will redirect here if env not ready)
+- Auto-suggested by `init` after init completes
+- Before first `/psd:deploy` (deploy will redirect here if env not ready)
 - Anytime the user hits "command not found" or env-related errors
 
 ## Pre-flight gates
-- `.planning/PROJECT.md` must exist (so we can read the Stack section). Else suggest `/psd-init` first.
+- `.planning/PROJECT.md` must exist (so we can read the Stack section). Else suggest `/psd:init` first.
 - **Skip-path:** if `.planning/DOCTOR.md` exists AND it's <24h old AND `--force` not passed → print "Env recently checked (see DOCTOR.md). Pass --force to re-check." and exit.
 
 ## Subagent dispatch
-Spawn `psd-doctor`:
+Spawn `doctor`:
 
 ```
-You are psd-doctor for this PSD project.
+You are doctor for this PSD project.
 
 Read yourself:
 - .planning/PROJECT.md (Stack section + Required CLIs list)
@@ -45,14 +45,14 @@ Report back in <=200 words: what's installed, what's missing, what was provision
 
 ## Companion delegation (suggestion-mode, per workflows/companion-skills.md)
 
-If any of these are in the available-skills list, the orchestrator prints a one-line FYI BEFORE dispatching `psd-doctor`:
+If any of these are in the available-skills list, the orchestrator prints a one-line FYI BEFORE dispatching `doctor`:
 
 - `vercel:bootstrap` — preferred for first-time Vercel + linked-resource setup
 - `vercel:status` — current Vercel state
 - `vercel:env` — env management
 - `supabase:supabase` — Supabase ops
 
-`psd-doctor` itself uses these companions if available; otherwise runs bash directly.
+`doctor` itself uses these companions if available; otherwise runs bash directly.
 
 ## Check sequence
 
@@ -129,13 +129,13 @@ If Vercel is linked:
 ## What you need to do
 - [ ] <action 1>
 - [ ] <action 2>
-- (or "Nothing! Env is ready. Run /psd-deploy.")
+- (or "Nothing! Env is ready. Run /psd:deploy.")
 ```
 
 ## Hand-off
 
-After `psd-doctor` runs:
-- `psd-deploy` reads `DOCTOR.md` and skips its own pre-flight if `Verdict: READY` and DOCTOR.md is <24h old
+After `doctor` runs:
+- `deploy` reads `DOCTOR.md` and skips its own pre-flight if `Verdict: READY` and DOCTOR.md is <24h old
 - The user sees the verbose env state once and doesn't have to think about it again until something changes
 
 ## Hard rules
@@ -144,4 +144,4 @@ After `psd-doctor` runs:
 - **Never push env to Vercel without explicit confirmation** — same reasoning
 - **Never log full secret values** in DOCTOR.md or anywhere else; mask with `<set>` or `<missing>` only
 - Cap DOCTOR.md at ~120 lines
-- Always exit with a clear "what to do next" — even if everything passes, suggest `/psd-deploy`
+- Always exit with a clear "what to do next" — even if everything passes, suggest `/psd:deploy`

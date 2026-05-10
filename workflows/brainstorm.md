@@ -1,6 +1,6 @@
-# Workflow: psd-brainstorm
+# Workflow: brainstorm
 
-Project-level Socratic ideation BEFORE `psd-init`. Designed for users who **don't fully know what they want to build yet**. Three discipline points:
+Project-level Socratic ideation BEFORE `init`. Designed for users who **don't fully know what they want to build yet**. Three discipline points:
 
 1. **Anchor by archetype first** when the idea is shallow — give the user concrete options to point at, not abstract questions.
 2. **Handle "I don't know" with defaults + tradeoffs**, not by recording it as unknown and moving on.
@@ -9,7 +9,7 @@ Project-level Socratic ideation BEFORE `psd-init`. Designed for users who **don'
 Question budget: 7 by default. The user can opt into a "deeper" round if uncertainty is still high after the reflect step.
 
 ## Pre-flight gates
-1. If `.planning/` already exists → STOP. Suggest `/psd-discuss [N]` instead (project is past brainstorm phase).
+1. If `.planning/` already exists → STOP. Suggest `/psd:discuss [N]` instead (project is past brainstorm phase).
 2. If `BRAINSTORM.md` already exists at project root → AskUserQuestion: continue/refine | start over | abort.
 
 ## Step 1 — Detect shallow vs. specific idea
@@ -62,7 +62,7 @@ Pick from these only as needed (don't ask all of them); group into AskUserQuesti
 
 1. Propose 2-3 reasonable defaults with **one-line tradeoffs each**, derived from what's already locked (archetype + prior answers).
 2. Re-ask via AskUserQuestion with those as options + "Other / Still not sure".
-3. If they pick "Still not sure" again, **pick the safest default for them** (the one that's easiest to change later) and tell them: "I'll go with X for v1; we can revisit in /psd-discuss before planning."
+3. If they pick "Still not sure" again, **pick the safest default for them** (the one that's easiest to change later) and tell them: "I'll go with X for v1; we can revisit in /psd:discuss before planning."
 
 Example:
 > Q: "Does it need user accounts in v1?"
@@ -89,7 +89,7 @@ The reflect step costs 1 question against the budget but catches misunderstandin
 
 ## Step 6 — "Keep going?" gate (mandatory after question 7)
 
-Same shape as `psd-discuss`'s extension. After the 7th question is answered (or earlier if you have what you need), **always** issue one final AskUserQuestion before writing BRAINSTORM.md:
+Same shape as `discuss`'s extension. After the 7th question is answered (or earlier if you have what you need), **always** issue one final AskUserQuestion before writing BRAINSTORM.md:
 
 ```
 Header: "Keep going?"
@@ -123,7 +123,7 @@ When the user picks "Other" on any AskUserQuestion and their typed text is a **c
 
 ### Rules
 - Clarification responses do NOT count against the question budget.
-- **Cap at 3 clarification rounds per single underlying question.** After 3, pick the safest default with a one-line rationale ("I'll go with X for v1; we can revisit in `/psd-init` or `/psd-discuss`") and continue.
+- **Cap at 3 clarification rounds per single underlying question.** After 3, pick the safest default with a one-line rationale ("I'll go with X for v1; we can revisit in `/psd:init` or `/psd:discuss`") and continue.
 - Log clarifications as nested entries under the parent question in the Q&A log.
 
 ### Q&A log format with clarification
@@ -142,7 +142,7 @@ Stop and write BRAINSTORM.md when ANY is true:
 - You hit 12 questions (hard cap)
 - User explicitly says "just write it" / "good enough" at any point
 
-If you stop with gaps, list them under "Open questions left for /psd-init or /psd-discuss".
+If you stop with gaps, list them under "Open questions left for /psd:init or /psd:discuss".
 
 ## What "adaptive" means (binding)
 - Don't ask fixed questions every time. Look at what's already clear vs unclear (use the archetype implication table to skip).
@@ -186,9 +186,9 @@ If you stop with gaps, list them under "Open questions left for /psd-init or /ps
 <one line — what would make this fail if wrong>
 
 ## Defaults applied (when user said "I don't know")
-- <field>: defaulted to <value> because <reason>; revisit in /psd-discuss
+- <field>: defaulted to <value> because <reason>; revisit in /psd:discuss
 
-## Open questions left for /psd-init or /psd-discuss
+## Open questions left for /psd:init or /psd:discuss
 - <item, or "none">
 
 ## Q&A log (for traceability)
@@ -197,14 +197,14 @@ If you stop with gaps, list them under "Open questions left for /psd-init or /ps
 ...
 ```
 
-## Hand-off to psd-init
+## Hand-off to init
 - BRAINSTORM.md sits at project root (NOT inside `.planning/` since that doesn't exist yet)
-- When `/psd-init` runs next, it detects BRAINSTORM.md and uses its sections to pre-fill PROJECT.md inputs. User confirms or edits before init writes anything.
-- After `psd-init` succeeds, the initializer appends BRAINSTORM.md content as a "## Brainstorm origin" section in PROJECT.md and deletes the standalone file.
+- When `/psd:init` runs next, it detects BRAINSTORM.md and uses its sections to pre-fill PROJECT.md inputs. User confirms or edits before init writes anything.
+- After `init` succeeds, the initializer appends BRAINSTORM.md content as a "## Brainstorm origin" section in PROJECT.md and deletes the standalone file.
 
 ## Hard rules
 - Never write into `.planning/` (it doesn't exist yet)
-- Never run `/psd-init` automatically — only suggest it
+- Never run `/psd:init` automatically — only suggest it
 - Never exceed **12 questions total** (7 default + opt-in extension up to 5 more via the "Keep going?" gate)
 - The "Keep going?" gate after question 7 is **mandatory** — even if you'd otherwise stop
 - The reflect step (Step 5) is **not optional** when input was shallow — fuzzy users especially benefit from it

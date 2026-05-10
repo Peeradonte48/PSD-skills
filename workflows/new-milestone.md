@@ -1,4 +1,4 @@
-# Workflow: psd-new-milestone
+# Workflow: new-milestone
 
 Archive the current milestone and scaffold the next.
 
@@ -8,10 +8,10 @@ Archive the current milestone and scaffold the next.
 3. Working tree must be clean.
 
 ## Subagent dispatch
-Spawn `psd-milestoner`:
+Spawn `milestoner`:
 
 ```
-You are psd-milestoner.
+You are milestoner.
 
 Read yourself:
 - .planning/STATE.md (current milestone version)
@@ -47,7 +47,7 @@ Tasks (in order, idempotent — safe to re-run on partial state):
    - milestone: v{N+1}
    - active_phase: 1
    - last_completed_phase: none
-   - last_skill: psd-new-milestone
+   - last_skill: new-milestone
    - decisions: append "Milestone v{N} closed <date>; v{N+1} opened with theme: <theme>"
 
 7. Append a "Milestone v{N} closed" entry to PROJECT.md decisions log.
