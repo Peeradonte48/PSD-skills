@@ -1,6 +1,6 @@
 {
   "name": "psd",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Plan-Ship-Done — a focused skill suite for going from idea to live URL with Claude Code. Brainstorm, init, doctor, discuss, plan, execute, verify, review, ship, deploy.",
   "author": { "name": "Peeradonte48" },
   "homepage": "https://github.com/Peeradonte48/PSD-skills",
